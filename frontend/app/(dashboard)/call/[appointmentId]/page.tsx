@@ -105,6 +105,7 @@ const Page = () => { // ✅ Capital P — Next.js convention
       useEffect(() => {
         if(appointmentId){
             fetchAppointmentById(appointmentId)
+            
         }
       }, [appointmentId, fetchAppointmentById])
 
