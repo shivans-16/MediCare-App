@@ -20,12 +20,14 @@ app.use(morgan("dev"));
 
 // ✅ CORS must come before routes and passport
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: [
+    "http://localhost:3000",
+    "https://medi-care-app-jet.vercel.app"
+  ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
-
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true }));
 
