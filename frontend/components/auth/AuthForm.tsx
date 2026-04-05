@@ -1,8 +1,4 @@
 
-
-
-
-
 'use client'
 
 import React, { useState } from "react";
@@ -52,28 +48,33 @@ const AuthForm = ({ type, userRole }: AuthFormProps) => {
 
     try {
       if (isSignup) {
+      
         if (userRole === "doctor") {
           await registerDoctor(formData);
+          router.push("/onboarding/doctor");
         } else {
           await registerPatient(formData);
+          router.push("/onboarding/patient");
         }
       } else {
+       
         if (userRole === "doctor") {
           await loginDoctor(formData.email, formData.password);
         } else {
           await loginPatient(formData.email, formData.password);
         }
-      }
 
-      // ✅ Login/Signup ke baad user ka onboarding status check karo
-      const { user } = useAuthStore.getState();
-      if (user) {
-        if (!user.onboarded) {
-          // Onboarding complete nahi hai → onboarding page pe bhejo
-          router.push(`/onboarding/${user.type}`);
-        } else {
-          // Onboarding complete hai → dashboard pe bhejo
-          router.push(`/${user.type}/dashboard`);
+        
+        const { user } = useAuthStore.getState();
+
+        if (user) {
+          if (user.onboarded) {
+            
+            router.push(`/${user.type}/dashboard`);
+          } else {
+            
+            router.push(`/onboarding/${user.type}`);
+          }
         }
       }
     } catch (error: any) {

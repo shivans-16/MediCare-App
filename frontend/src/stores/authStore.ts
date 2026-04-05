@@ -1,4 +1,5 @@
 
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { User } from "@/lib/types";
@@ -33,7 +34,6 @@ export const useAuthStore = create<AuthState>()(
       error: null,
       isAuthenticated: false,
 
-      // ✅ Set user after login/register
       setUser: (user, token) => {
         localStorage.setItem("token", token);
         set({
@@ -44,10 +44,8 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      // ✅ Clear error
       cleanError: () => set({ error: null }),
 
-      // ✅ Logout
       logout: () => {
         localStorage.removeItem("token");
         set({
@@ -58,24 +56,33 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      // ✅ Doctor Login
+    
       loginDoctor: async (email, password) => {
         set({ loading: true, error: null });
         try {
-          const response = await postWithoutAuth(
-            "auth/doctor/login",
-            { email, password }
-          );
+          const response = await postWithoutAuth("auth/doctor/login", { email, password });
 
-          console.log("🔍 RESPONSE:", JSON.stringify(response.data));
-
-          const userData: User = {
+         
+          const basicUser: User = {
             ...response.data,
             type: "doctor",
-            onboarded: response.data.onboarded ?? false, // ✅ backend na bheje toh false
+            onboarded: false,
           };
+          get().setUser(basicUser, response.data.token);
 
-          get().setUser(userData, response.data.token);
+          
+          const fullProfile = await get().fetchProfile();
+
+          if (fullProfile) {
+            set({
+              user: {
+                ...fullProfile,
+                type: "doctor",
+              
+                onboarded: (fullProfile as any).isOnboarded ?? false,
+              },
+            });
+          }
 
           return response.data;
         } catch (error: any) {
@@ -86,22 +93,30 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // ✅ Patient Login
+   
       loginPatient: async (email, password) => {
         set({ loading: true, error: null });
         try {
-          const response = await postWithoutAuth(
-            "auth/patient/login",
-            { email, password }
-          );
+          const response = await postWithoutAuth("auth/patient/login", { email, password });
 
-          const userData: User = {
+          const basicUser: User = {
             ...response.data,
             type: "patient",
-            onboarded: response.data.onboarded ?? false, // ✅ backend na bheje toh false
+            onboarded: false,
           };
+          get().setUser(basicUser, response.data.token);
 
-          get().setUser(userData, response.data.token);
+          const fullProfile = await get().fetchProfile();
+
+          if (fullProfile) {
+            set({
+              user: {
+                ...fullProfile,
+                type: "patient",
+                onboarded: (fullProfile as any).isOnboarded ?? fullProfile.onboarded ?? false,
+              },
+            });
+          }
 
           return response.data;
         } catch (error: any) {
@@ -112,23 +127,19 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // ✅ Doctor Register
+     
       registerDoctor: async (data) => {
         set({ loading: true, error: null });
         try {
-          const response = await postWithoutAuth(
-            "auth/doctor/register",
-            data
-          );
+          const response = await postWithoutAuth("auth/doctor/register", data);
 
           const userData: User = {
             ...response.data,
             type: "doctor",
-            onboarded: response.data.onboarded ?? false,
+            onboarded: false,
           };
 
           get().setUser(userData, response.data.token);
-
         } catch (error: any) {
           set({ error: error?.message || "Registration failed" });
           throw error;
@@ -137,23 +148,19 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // ✅ Patient Register
+  
       registerPatient: async (data) => {
         set({ loading: true, error: null });
         try {
-          const response = await postWithoutAuth(
-            "auth/patient/register",
-            data
-          );
+          const response = await postWithoutAuth("auth/patient/register", data);
 
           const userData: User = {
             ...response.data,
             type: "patient",
-            onboarded: response.data.onboarded ?? false,
+            onboarded: false,
           };
 
           get().setUser(userData, response.data.token);
-
         } catch (error: any) {
           set({ error: error?.message || "Registration failed" });
           throw error;
@@ -162,44 +169,35 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // ✅ Fetch Profile
+     
       fetchProfile: async () => {
-        set({ loading: true, error: null });
         try {
           const { user } = get();
-
           if (!user) throw new Error("User not found");
 
-          const endPoint =
-            user.type === "doctor"
-              ? "doctor/me"
-              : "patient/me";
-
+          const endPoint = user.type === "doctor" ? "doctor/me" : "patient/me";
           const response = await getWithAuth(endPoint);
 
           const updatedUser: User = {
             ...user,
             ...response.data,
+           
+            onboarded: response.data.isOnboarded ?? response.data.onboarded ?? false,
           };
 
           set({ user: updatedUser });
-
           return updatedUser;
-
         } catch (error: any) {
           set({ error: error?.message || "Failed to fetch profile" });
           return null;
-        } finally {
-          set({ loading: false });
         }
       },
 
-      // ✅ Update Profile (Onboarding)
+     
       updateProfile: async (data) => {
         set({ loading: true, error: null });
         try {
           const { user } = get();
-
           if (!user) throw new Error("User not found");
 
           const endPoint =
@@ -212,11 +210,10 @@ export const useAuthStore = create<AuthState>()(
           const updatedUser: User = {
             ...user,
             ...response.data,
-            onboarded: true,
+            onboarded: true, 
           };
 
           set({ user: updatedUser });
-
         } catch (error: any) {
           set({ error: error?.message || "Profile update failed" });
           throw error;
@@ -226,7 +223,6 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
 
-    // ✅ Persist Config
     {
       name: "auth-storage",
       partialize: (state) => ({

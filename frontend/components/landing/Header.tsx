@@ -1,10 +1,10 @@
 'use client'
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React from 'react'
 import Link from 'next/link';
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Settings, User, LayoutDashboard, CalendarDays } from 'lucide-react'
+import { Settings, User, LayoutDashboard, CalendarDays, LogOut } from 'lucide-react'
 import { Stethoscope, Bell } from 'lucide-react';
 import {
     DropdownMenu,
@@ -31,8 +31,14 @@ interface NavigationItem {
 }
 
 const Header: React.FC<HeaderProps> = ({ showDashboardNav = false }) => {
-    const { user, isAuthenticated } = useAuthStore();
+    const { user, isAuthenticated, logout } = useAuthStore();
     const pathname = usePathname();
+    const router = useRouter();
+
+    const handleLogout = () => {
+        logout();
+        router.push('/');
+    };
 
     const getDashboardNavigation = (): NavigationItem[] => {
         if (!user || !showDashboardNav) return [];
@@ -40,7 +46,7 @@ const Header: React.FC<HeaderProps> = ({ showDashboardNav = false }) => {
             return [
                 {
                     lable: "Appointments",
-                    icon: CalendarDays, // ✅ Lucide icon, not Shadcn Calendar
+                    icon: CalendarDays,
                     href: '/patient/dashboard',
                     active: pathname?.includes('/patient/dashboard') || false
                 }
@@ -49,13 +55,13 @@ const Header: React.FC<HeaderProps> = ({ showDashboardNav = false }) => {
             return [
                 {
                     lable: "Dashboard",
-                    icon: LayoutDashboard, // ✅ Lucide icon
+                    icon: LayoutDashboard,
                     href: '/doctor/dashboard',
                     active: pathname?.includes('/doctor/dashboard') || false
                 },
                 {
                     lable: "Appointments",
-                    icon: CalendarDays, // ✅ Lucide icon
+                    icon: CalendarDays,
                     href: '/doctor/appointments',
                     active: pathname?.includes('/doctor/appointments') || false
                 }
@@ -134,7 +140,6 @@ const Header: React.FC<HeaderProps> = ({ showDashboardNav = false }) => {
                                             <p className='font-medium truncate'>{user?.name}</p>
                                             <p className='text-sm text-gray-500 truncate max-w-[140px]'>{user?.email}</p>
                                         </div>
-                                        
                                     </div>
                                 </DropdownMenuLabel>
 
@@ -153,6 +158,17 @@ const Header: React.FC<HeaderProps> = ({ showDashboardNav = false }) => {
                                         Settings
                                     </Link>
                                 </DropdownMenuItem>
+
+                                {/* ✅ Logout Option - Red text, no button */}
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                    onClick={handleLogout}
+                                    className='flex items-center text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer'
+                                >
+                                    <LogOut className='w-4 h-4 mr-2' />
+                                    Logout
+                                </DropdownMenuItem>
+
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
@@ -191,5 +207,3 @@ const Header: React.FC<HeaderProps> = ({ showDashboardNav = false }) => {
 };
 
 export default Header;
-
-
