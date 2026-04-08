@@ -289,7 +289,7 @@ const DoctorAppointmentContent = () => {
             </div>
 
             <div className="flex items-center space-x-4 ">
-              <Link href="/dcotor/profile">
+              <Link href="/doctor/profile">
                 <Button>
                   <Calendar className="w-4 h-4 mr-2 " />
                    Update Availability
