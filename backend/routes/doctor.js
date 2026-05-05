@@ -1,6 +1,7 @@
 const express = require("express");
 const { body } = require("express-validator");
-const { Doctor, validate } = require("../model/doctor");
+const { Doctor} = require("../model/doctor");
+const {validate }=require('../middleware/validator');
 const { authenticate, requireRole } = require("../middleware/auth");
 const Appointment = require("../model/appointment");
 const router = express.Router();
@@ -270,10 +271,7 @@ router.get('/dashboard', authenticate, requireRole('doctor'), async (req, res) =
     console.error('Dashboard error', error);
     res.serverError('failed to fetch doctor dashboard', [error.message]);
   }
-}); // ✅ closing sahi hai
-
-
-// ✅ Dynamic route - BAAD mein rakho
+}); 
 router.get('/:doctorId', async (req, res) => {
   try {
     const { doctorId } = req.params;
@@ -289,102 +287,7 @@ router.get('/:doctorId', async (req, res) => {
 
 
 
-http://localhost:8000/api/doctor/list
-// router.get('/dashbaord',authenticate,requireRole('doctor',async(req,res)=>{
-//   try{
-//     const doctorId=req.id;
-//     const now=new Date();
 
-//     const startOfDay=new Date(now.getFullYear(),now.getMonth(),now.getDate(),0,0,0,0)
-//     const endOfDay=new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59,59,999)
-
-//     if(!doctor)
-//     {
-//       return res.notFound('Doctot not found')
-//     }
-//     const todayAppointment=await Appointment.find({
-//       doctorId,
-//       slotStartIso:{$gte:startOfDay,$lte:endOfDay},
-//       status:{$ne:'Cancelled'}
-//     })
-//     .populate('patientId','name profileImage age email phone')
-//     .populate('doctorId','name fees profileImage specialization')
-//     .sort({slotStartIso:1})
-
-
-//     const upcomingAppointment=await Appointment.find({
-//       doctorId,
-//       slotStartIso:{$gt:endOfDay},
-//       status:{$ne:'Scheduled'}
-//     })
-//     .populate('patientId','name profileImage age email phone')
-//     .populate('doctorId','name fees profileImage specialization')
-//     .sort({slotStartIso:1})
-//     .limit(5)
-
-
-//     const uniquePatiendIds=await Appointment.distinct('patiendId',{doctorId});
-//     const totalPatients=uniquePatiendIds.length;
-
-//     const completedAppointment=await Appointment.countDocuments({
-//       doctorId,
-//       status:'Completed'
-//     });
-
-//     const totalAppointment=await Appointment.find({
-//       doctorId,
-//       status:'Completed'
-//     });
-
-//     const totalRevenue=totalAppointment.reduce((sum,apt)=>sum + (apt.fees || doctor.fees || 0),0);
-//      const dashboardData={
-//       user:{
-//         name:doctor.name,
-//         fees:doctor.fees,
-//         profileImage:doctor.profileImage,
-//         specialization:doctor.specialization,
-//         hospitalInfo:doctor.hospitalInfo
-
-//       },
-//       stats:{
-//         totalPatients,
-//         todayAppointment:totalAppointment.length,
-//         totalRevenue,
-//         completedAppointment,
-//         averageRating:4.8
-//       },
-//       totalAppointment,
-//       upcomingAppointment,
-//       performance:{
-//         patientSatisfaction:4.8,
-//         completionRate:98,
-//         responseTime:'< 2min'
-//             }
-//      }
-//      res.ok(dashboardData,'Dashboard data retireved')
-//   }catch(error){
-//     console.error('Dashboard error',error);
-//     res.serverError('failed to fetch doctor dashboard',[error.message]);
-//   }
-// }))
-
-
-
-// router.get('/:doctorId',validate,async(req,res)=>{
-//   try{
-//     const {doctorId}=req.params;
-//     const doctor=await Doctor.findById(doctorId).select(
-//       '-password -googleId'
-//     ).lean();
-//     if(!doctor){
-//       return res.notFound('Doctor not found')
-//     }
-//     res.ok(doctor,'doctor details fetched successfully')
-
-//   }catch(error){
-//     res.serverError('fetching doctor failed',[error.message])
-//   }
-// })
 
 
 module.exports = router;

@@ -18,6 +18,7 @@ interface AuthState {
 
   loginDoctor: (email: string, password: string) => Promise<void>;
   loginPatient: (email: string, password: string) => Promise<void>;
+  loginAdmin: (email: string, password: string) => Promise<void>;
   registerDoctor: (data: any) => Promise<void>;
   registerPatient: (data: any) => Promise<void>;
 
@@ -127,6 +128,39 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+       loginAdmin: async (email, password) => {
+        set({ loading: true, error: null });
+        try {
+          const response = await postWithoutAuth("auth/admin/login", { email, password });
+
+          const basicUser: User = {
+            ...response.data,
+            type: "patient",
+            onboarded: false,
+          };
+          get().setUser(basicUser, response.data.token);
+
+          const fullProfile = await get().fetchProfile();
+
+          if (fullProfile) {
+            set({
+              user: {
+                ...fullProfile,
+                type: "patient",
+                onboarded: (fullProfile as any).isOnboarded ?? fullProfile.onboarded ?? false,
+              },
+            });
+          }
+
+          return response.data;
+        } catch (error: any) {
+          set({ error: error?.message || "Login failed" });
+          throw error;
+        } finally {
+          set({ loading: false });
+        }
+      },
+
      
       registerDoctor: async (data) => {
         set({ loading: true, error: null });
@@ -175,7 +209,7 @@ export const useAuthStore = create<AuthState>()(
           const { user } = get();
           if (!user) throw new Error("User not found");
 
-          const endPoint = user.type === "doctor" ? "doctor/me" : "patient/me";
+          const endPoint = user.type === "doctor" ? "doctor/me" : user.type ==="patient" ? "patient/me" : "admin/profile";
           const response = await getWithAuth(endPoint);
 
           const updatedUser: User = {

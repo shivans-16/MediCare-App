@@ -153,7 +153,7 @@ const Header: React.FC<HeaderProps> = ({ showDashboardNav = false }) => {
 
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem asChild>
-                                    <Link href={`/${user?.type}/settings`} className='flex items-center'>
+                                    <Link href={`/${user?.type}/profile`} className='flex items-center'>
                                         <Settings className='w-4 h-4 mr-2' />
                                         Settings
                                     </Link>

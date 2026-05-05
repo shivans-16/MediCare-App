@@ -36,7 +36,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  type: "doctor" | "patient";
+  type: "doctor" | "patient" | "admin";
   phone?: string;
   profileImage?: string;
   isVerified:boolean
@@ -82,6 +82,15 @@ export interface User {
     end: string;
   }>;
   slotDurationMinutes?: number;
+
+  // admin
+  role?:string;
+  permissions:{
+    userManagement?:boolean,
+    doctorManagement?:boolean,
+    paymentManagement?:boolean,
+    analytics?:boolean
+  },
 }
 
 
