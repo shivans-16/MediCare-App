@@ -131,14 +131,14 @@ export const useAuthStore = create<AuthState>()(
        loginAdmin: async (email, password) => {
         set({ loading: true, error: null });
         try {
-          const response = await postWithoutAuth("auth/admin/login", { email, password });
-
+          const response = await postWithoutAuth("/admin/auth/login", { email, password }) as any;
+          console.log("Admin response:", response);
           const basicUser: User = {
-            ...response.data,
-            type: "patient",
+            ...response.user,
+            type: "admin",
             onboarded: false,
           };
-          get().setUser(basicUser, response.data.token);
+          get().setUser(basicUser, response.token);
 
           const fullProfile = await get().fetchProfile();
 
@@ -146,7 +146,7 @@ export const useAuthStore = create<AuthState>()(
             set({
               user: {
                 ...fullProfile,
-                type: "patient",
+                type: "admin",
                 onboarded: (fullProfile as any).isOnboarded ?? fullProfile.onboarded ?? false,
               },
             });

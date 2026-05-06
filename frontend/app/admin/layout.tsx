@@ -4,8 +4,9 @@
 // admin interface creation and insertion
 'use client'
 import Loader from "@/components/Loader";
+import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/src/stores/authStore";
-import { CreditCard, LayoutDashboard, Users } from "lucide-react";
+import { CreditCard, LayoutDashboard, LogOut, Users } from "lucide-react";
 import { usePathname,useRouter } from "next/navigation";
 import React,{useEffect, useState} from 'react';
 
@@ -43,7 +44,7 @@ export default function AdminLayout({children}:AdminLayoutProps){
             setIsChecking(true);
             return;
         }
-        if(!isAuthenticated || user?.type === 'admin')
+        if(!isAuthenticated || user?.type !== 'admin')
         {
             return router.push('/admin/login');
         }
@@ -87,7 +88,53 @@ export default function AdminLayout({children}:AdminLayoutProps){
         return <Loader/>
     }
     return(
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-gray-50">
+            <header className="bg-white shadow-sm border-b">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center py-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">
+                            Admin Portal
+                        </h1>
+                        <p className="text-sm text-gray-800">
+                            Welcome back, {user?.name}
+                        </p>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                        <Button 
+                        variant="outline"
+                        onClick={handleLogout}
+                        >
+                            <LogOut className="h-4 w-5 mr-2"/>
+                            Logout
+                        </Button>
+                    </div>
+                </div>
+                </div>
+            </header>
+            <nav className="bg-white shadow-sm">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex space-x-8">
+                        {navigationItem.map((item)=>{
+                            const Icon=item.icon;
+                            return (
+                                <Button
+                                variant="ghost"
+                                key={item.name}
+                                onClick={()=>router.push(item.href)}
+                                className={`${item.current ? 'text-blue-600 border-b-2 border-blue-600 rounded-none':"text-gray-600 hover:text-gray-900"} `}
+                                >
+                                    <Icon className="h-4 w-4 mr-2"/>
+                                    {item.name}
+                                </Button>
+                            )
+                        })}
+                    </div>
+                </div>
+            </nav>
+            <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                {children}
+            </main>
 
         </div>
     )
