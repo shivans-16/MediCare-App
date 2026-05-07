@@ -2,11 +2,11 @@
 
 const express = require("express");
 const { body } = require("express-validator");
-const {validate} = require("../middleware/validator");
+const { validate } = require("../middleware/validator");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const Admin = require("../model/admin");
-const { authenticate, requireAdmin } = require("../middleware/auth");
+const { authenticate, requireAdmin, requirePermission } = require("../middleware/auth");
 const { Patient } = require("../model/patient");
 const { Doctor } = require("../model/doctor");
 const Appointment = require("../model/appointment");
@@ -161,4 +161,184 @@ router.get('/dashboard', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
+// Get all users
+
+
+router.get('/users', authenticate, requireAdmin, requirePermission('userManagement'), async (req, res) => {
+  try {
+    const { page = 1, limit = 10, type, search } = req.query;
+    const skip = (page - 1) * limit;
+    let query = {};
+
+    if (type) {
+      query = { ...query, type };
+    }
+    if (search) {
+      query = {
+        ...query, $or: [
+          { name: { $regex: search, $options: 'i' } },  
+          { email: { $regex: search, $options: 'i' } }
+        ]
+      }
+    }
+
+    const [patients, doctors] = await Promise.all([
+      Patient.find(query).select('-password').skip(skip).limit(parseInt(limit)),
+      Doctor.find(query).select('-password').skip(skip).limit(parseInt(limit))
+    ]);
+
+    const users = [  
+      ...patients.map(p => ({ ...p.toObject(), type: 'patient' })),
+      ...doctors.map(d => ({ ...d.toObject(), type: 'doctor' }))
+    ];
+
+    res.ok(users, 'Users retrieved');  
+
+  } catch (error) {
+    res.serverError("failed to fetch users", [error.message]);
+  }
+});
+
+// update user status
+router.put('/users/:userId/status', authenticate, requireAdmin, requirePermission('userManagement'), async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { isActive } = req.body;
+
+    // First check which collection the user belong
+
+    const patient = await Patient.findById(userId);
+    const doctor = await Doctor.findById(userId);
+
+    let updatedUser;
+    if (patient) {
+      updatedUser = await Patient.findByIdAndUpdate(userId, { isActive }, { new: true }).select('-password');
+    }
+    else if (doctor) {
+      updatedUser = await Doctor.findByIdAndUpdate(userId, { isActive }, { new: true }).select('-password');
+    }
+    else {
+      return res.notFound('user not found');
+    }
+    res.ok(updatedUser, 'User staus updated')
+  } catch (error) {
+    res.serverError("failed to update user status", [error.message])
+  }
+});
+
+// Api for the payments to payout the doctors
+
+router.get('/payments',authenticate,requireAdmin,requirePermission('paymentManagement'),async(req,res)=>{
+  try {
+    const { page = 1, limit = 10, payoutStatus } = req.query;
+    const skip = (page - 1) * limit;
+    let matchedQuery={status:'Completed'};
+    if(payoutStatus)
+    {
+      matchedQuery.payoutStatus=payoutStatus;
+    }
+
+    // Get completed appointments with payment details
+    const appointments=await Appointment.aggregate([
+    {
+      $match:matchedQuery
+    },
+    {
+      $lookup:{
+        from:'doctors',
+        localField:'doctorId',
+        foreignField:'_id',
+        as:'doctor'
+      }
+    },
+    {
+      $unwind:'$doctor'
+    },
+    {
+      $lookup:{
+        from:'patients',
+        localField:'patientId',
+        foreignField:'_id',
+        as:'patient'
+      }
+    },
+    {
+      $unwind:'$patient'
+    },
+    {
+      $project:{
+        _id:1,
+        date:1,
+        totalAmount:1,
+        doctorName:'$doctor.name',
+        doctorEmail:'$doctor.email',
+        patientName:'$patient.name',
+        patientEmail:'$patient.email',
+        consultationFees:1,
+        platformFees:1,
+        paymentStatus:1,
+        payoutStatus:1,
+        payoutDate:1,
+        createdAt:1
+
+      }
+    },
+    {
+      $sort:{createdAt:-1}
+    },
+    {
+      $skip:skip
+    },
+    {
+      $limit:parseInt(limit)
+    }
+    ]);
+    res.ok(appointments,'Payments retrieved')
+  } catch (error) {
+    res.serverError('Failed to fetch payments'[error.message]);
+  }
+})
+
+// Processing the pauout to doctors
+
+router.put('/payments/:appointmentId/payout', authenticate, requireAdmin, requirePermission('paymentManagement'), async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const { payoutStatus } = req.body;  // ✅ was paymentStatus
+
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) {
+      return res.notFound('Appointment not found');
+    }
+    if (appointment.status != 'Completed') {
+      return res.badRequest('Can only process the payouts for the completed appointments');
+    }
+
+    const payoutAmount = appointment.consultationFees;
+    const platformFees = appointment.platformFees;
+
+    const updateData = { payoutStatus };
+    if (payoutStatus === 'Paid') {  // ✅ was paymentStatus
+      updateData.payoutDate = new Date();
+    }
+
+    const updateAppointment = await Appointment.findByIdAndUpdate(
+      appointmentId,
+      updateData,
+      { new: true }
+    ).populate('doctorId', 'name email').populate('patientId', 'name email');
+
+    res.ok({
+      ...updateAppointment.toObject(),
+      payoutAmount,
+      platformFees,
+      message: payoutStatus === 'Paid'  // ✅ was paymentStatus
+        ? `Payout marked as paid. Doctor receives ₹${payoutAmount}, Platform keeps ₹${platformFees}`
+        : `Payout ${payoutStatus.toLowerCase()} successfully`  // ✅ was paymentStatus
+    }, `Payout ${payoutStatus.toLowerCase()} successfully`);  // ✅ was paymentStatus
+
+  } catch (error) {
+    res.serverError('Failed to payout payments', [error.message]);
+  }
+});
 module.exports = router;

@@ -236,10 +236,12 @@ router.get('/dashboard', authenticate, requireRole('doctor'), async (req, res) =
 
     const totalAppointment = await Appointment.find({
       doctorId,
-      status: 'Completed'
+      status: 'Completed',
+      paymentStatus:'Paid'
+
     });
 
-    const totalRevenue = totalAppointment.reduce((sum, apt) => sum + (apt.fees || doctor.fees || 0), 0);
+    const totalRevenue = totalAppointment.reduce((sum, apt) => sum + (apt.consultationFees || apt.fees || doctor.fees || 0), 0);
 
     const dashboardData = {
       user: {

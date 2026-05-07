@@ -4,7 +4,7 @@ import React from 'react'
 import Link from 'next/link';
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Settings, User, LayoutDashboard, CalendarDays, LogOut } from 'lucide-react'
+import { Settings, User, LayoutDashboard, CalendarDays, LogOut, Shield } from 'lucide-react'
 import { Stethoscope, Bell } from 'lucide-react';
 import {
     DropdownMenu,
@@ -179,6 +179,13 @@ const Header: React.FC<HeaderProps> = ({ showDashboardNav = false }) => {
                                 <Link href="/login/patient">
                                     <Button variant="ghost" className='text-blue-900 font-medium hover:text-blue-700'>
                                         Log in
+                                    </Button>
+                                </Link>
+
+                                <Link href="/admin/login">
+                                    <Button variant="ghost" className='text-gray-900 font-medium hover:text-gray-1000 flex items-center'>
+                                        <Shield className='w-4 h-4 mr-1'/>
+                                        Admin
                                     </Button>
                                 </Link>
                                 <Link href="/signup/patient">
