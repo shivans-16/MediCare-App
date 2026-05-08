@@ -176,7 +176,7 @@ router.post('/book', authenticate, requireRole('patient'), [
 // ===========================
 // PUT - Join consultation
 // ===========================
-router.put('/join/:id', authenticate, async (req, res) => {
+router.put('/:id/join', authenticate, async (req, res) => {
     try {
         const appointment = await Appointment.findById(req.params.id)
             .populate('patientId', 'name profileImage')

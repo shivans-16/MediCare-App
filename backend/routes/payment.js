@@ -12,7 +12,8 @@ const razorPay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
-
+console.log("Razorpay Key ID:", process.env.RAZORPAY_KEY_ID);
+console.log("Razorpay Key Secret:", process.env.RAZORPAY_KEY_SECRET ? "SET" : "NOT SET");
 router.post('/create-order', authenticate, requireRole('patient'),
     [
         body('appointmentId').isMongoId().withMessage('Valid appointment ID is required')

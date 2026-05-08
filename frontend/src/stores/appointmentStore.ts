@@ -147,28 +147,50 @@ export const useAppointmentStore = create<AppointmentState>((set) => ({
     },
 
     // ✅ Fetch single appointment by ID
-    fetchAppointmentById: async (appointmentId: string) => {
-        set({ loading: true, error: null });
-        try {
-            const response = await getWithAuth(`/appointment/${appointmentId}`);
-               console.log("🔍 Raw response:", response)
-            const appointment = response.data ?? null;
-            set({ currentAppointment: appointment });
-            return appointment;
-        } catch (error: any) {
-            set({ error: error.message });
-            return null;
-        } finally {
-            set({ loading: false });
-        }
-    },
+    // fetchAppointmentById: async (appointmentId: string) => {
+    //     set({ loading: true, error: null });
+    //     try {
+    //         const response = await getWithAuth(`/appointment/${appointmentId}`);
+    //            console.log("🔍 Raw response:", response)
+    //         const appointment = response.data ?? null;
+    //         set({ currentAppointment: appointment });
+    //         return appointment;
+    //     } catch (error: any) {
+    //         set({ error: error.message });
+    //         return null;
+    //     } finally {
+    //         set({ loading: false });
+    //     }
+    // },
 
+
+    fetchAppointmentById: async (appointmentId: string) => {
+    set({ loading: true, error: null });
+    try {
+        const response = await getWithAuth(`/appointment/${appointmentId}`);
+        console.log("🔍 Raw response:", response);
+        
+        // ❌ PEHLE:
+        
+        
+        // ✅ BADAL KE (backend response.data.data mein hai):
+        const appointment = response.data?.data ?? response.data ?? null;
+        
+        set({ currentAppointment: appointment });
+        return appointment;
+    } catch (error: any) {
+        set({ error: error.message });
+        return null;
+    } finally {
+        set({ loading: false });
+    }
+},
     // ✅ Book a new appointment
    bookAppointment: async (data: BookingData) => {
     set({ loading: true, error: null });
     try {
         const response = await postWithAuth('/appointment/book', data);
-        const newAppointment = response.data; // ✅ .data.data नहीं, सिर्फ .data
+        const newAppointment = response.data; 
         if (newAppointment) {
             set((state) => ({
                 appointments: [...state.appointments, newAppointment]
@@ -184,27 +206,56 @@ export const useAppointmentStore = create<AppointmentState>((set) => ({
 },
 
     // ✅ Join consultation (Video/Voice)
+    // joinConsultation: async (appointmentId: string) => {
+    //     set({ loading: true, error: null });
+    //     try {
+    //         const response = await putWithAuth(
+    //             `/appointment/${appointmentId}/join`, {}
+    //         );
+    //         const updated = response.data.data ?? null;
+    //         set((state) => ({
+    //             currentAppointment: updated,
+    //             appointments: state.appointments.map((apt) =>
+    //                 apt._id === appointmentId
+    //                     ? { ...apt, status: 'In Progress' as Appointment['status'] }
+    //                     : apt
+    //             )
+    //         }));
+    //     } catch (error: any) {
+    //         set({ error: error.message });
+    //     } finally {
+    //         set({ loading: false });
+    //     }
+    // },
+
     joinConsultation: async (appointmentId: string) => {
-        set({ loading: true, error: null });
-        try {
-            const response = await putWithAuth(
-                `/appointment/${appointmentId}/join`, {}
-            );
-            const updated = response.data.data ?? null;
-            set((state) => ({
-                currentAppointment: updated,
-                appointments: state.appointments.map((apt) =>
-                    apt._id === appointmentId
-                        ? { ...apt, status: 'In Progress' as Appointment['status'] }
-                        : apt
-                )
-            }));
-        } catch (error: any) {
-            set({ error: error.message });
-        } finally {
-            set({ loading: false });
-        }
-    },
+    set({ loading: true, error: null });
+    try {
+        const response = await putWithAuth(
+            `/appointment/${appointmentId}/join`, {}
+        );
+        
+        // ❌ PEHLE — galat response path se null aa raha tha:
+        // const updated = response.data.data ?? null;
+        
+        // ✅ BADAL KE:
+        const updated = response.data?.data ?? response.data ?? null;
+        
+        set((state) => ({
+            // ✅ Agar updated null ho toh purana currentAppointment rakho
+            currentAppointment: updated ?? state.currentAppointment,
+            appointments: state.appointments.map((apt) =>
+                apt._id === appointmentId
+                    ? { ...apt, status: 'In Progress' as Appointment['status'] }
+                    : apt
+            )
+        }));
+    } catch (error: any) {
+        set({ error: error.message });
+    } finally {
+        set({ loading: false });
+    }
+},
 
     // ✅ End consultation with prescription & notes
     endConsultation: async (appointmentId: string, prescription?: string, notes?: string) => {
