@@ -28,17 +28,11 @@ const TestimonialSection = () => {
                             ))}
                         </div>
 
-                        {/* <div className='flex text-yellow-400'>
-                        {[...Array(5)].map((_ ,i) =>{
-                              <svg key={i} className="w-6 h-6 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                 </svg>
-                        })}
-                    </div> */}
+                        
                         <span className='text muted-foreground'>52K+ reviews</span>
                     </div>
                 </div>
-                {/* testimonial grid */}
+              
                 
 <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
   {testimonials.map((testimonial, index) => (
@@ -78,41 +72,7 @@ const TestimonialSection = () => {
 
 
 
-                {/* <div className='grid gird-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
-                    {testimonials.map((testimonial, index) => {
-                        <Card key={index} className={`${testimonial.bgColor} border border-border hover:shadow-lg transition-shadow duration-200` >
-                            <CardContent className='p-6'>
-
-                                <div className='flex text-yellow-400'>
-                                    {[...Array(testimonial.rating)].map((_, i) => (
-                                        <svg
-                                            key={i}
-                                            className="w-6 h-6 fill-current"
-                                        >
-                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 
-                1.18 6.88L12 17.77l-6.18 3.25L7 14.14 
-                2 9.27l6.91-1.01L12 2z"/>
-                                        </svg>
-                                    ))}
-                                </div>
-                                <p className='text-sm text-foreground mb-6 leading-related'>
-                                    {testimonial.text}
-                                </p>
-                                <div className='text-sm'>
-                                    <p className='font-semibold text-primary'>
-                                        {testimonial.author}
-                                    </p>
-                                    <p className='text-muted-foreground'>
-                                        {testimonial.location}
-                                    </p>
-                                </div>
-                            </CardContent>
-
-                    </Card>
-                    
-                })}
-
-            </div> */}
+        
 
 
 <div className='text-center mt-8'>

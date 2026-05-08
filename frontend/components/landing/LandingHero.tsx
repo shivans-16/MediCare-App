@@ -34,7 +34,7 @@ const LandingHero=()=>{
             </h1>
 
         <p className='text-xl text-gray-600 mb-8 max-w-2xl mx-auto'>
-            Online primary care that's affrdable sith or without insurance .Quality healthcare, accessible, anytime, anywhere 
+            Online primary care that's affordable with or without insurance. Quality healthcare, accessible, anytime, anywhere 
         </p>
         <div className='flex flex-col sm:flex-row gap-4 justify-center mb-12'>
             <Button onClick={handleBookConsultation} size='lg' className='bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-full px-8 py-3 text-lg'>
@@ -78,13 +78,13 @@ const LandingHero=()=>{
             <div className='flex items-center space-x-2'>
                 <div className='w-2 h-2 bg-green-500 rounded-full'>
                 </div>
-                <span>500+ Certified Doctors</span>
+                <span>300+ Certified Doctors</span>
             </div>
 
               <div className='flex items-center space-x-2'>
                 <div className='w-2 h-2 bg-green-500 rounded-full'>
                 </div>
-                <span>50,000+ Satisfied Patients</span>
+                <span>10,000+ Satisfied Patients</span>
             </div>
 
               <div className='flex items-center space-x-2'>

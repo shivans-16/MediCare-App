@@ -178,7 +178,7 @@ export const specializations = [
     {
       title: "For Patients",
       links: [
-        { text: "Find Doctors", href: "/doctors" },
+        { text: "Find Doctors", href: "/signup/patient" },
         { text: "Book Appointment", href: "/signup/patient" },
       ]
     },
@@ -186,7 +186,7 @@ export const specializations = [
       title: "Legal",
       links: [
         { text: "Privacy Policy", href: "/privacy" },
-        { text: "Terms of Service", href: "/terms" },
+       
       ]
     }
   ];
