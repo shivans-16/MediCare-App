@@ -16,7 +16,7 @@ passport.use('google', new GoogleStrategy({
     callbackURL: process.env.GOOGLE_CALLBACK_URL,
     passReqToCallback: true
 },
-    async (req, accessToken, refreshToken, profile, done) => {  // ✅ 'profile'
+    async (req, accessToken, refreshToken, profile, done) => {  
         try {
             const userType = req.query.state || 'patient';
             const { emails, displayName, photos } = profile;    // ✅ from 'profile'

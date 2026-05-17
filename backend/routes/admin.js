@@ -304,7 +304,7 @@ router.get('/payments',authenticate,requireAdmin,requirePermission('paymentManag
 router.put('/payments/:appointmentId/payout', authenticate, requireAdmin, requirePermission('paymentManagement'), async (req, res) => {
   try {
     const { appointmentId } = req.params;
-    const { payoutStatus } = req.body;  // ✅ was paymentStatus
+    const { payoutStatus } = req.body;  
 
     const appointment = await Appointment.findById(appointmentId);
     if (!appointment) {
@@ -318,7 +318,7 @@ router.put('/payments/:appointmentId/payout', authenticate, requireAdmin, requir
     const platformFees = appointment.platformFees;
 
     const updateData = { payoutStatus };
-    if (payoutStatus === 'Paid') {  // ✅ was paymentStatus
+    if (payoutStatus === 'Paid') {  
       updateData.payoutDate = new Date();
     }
 
@@ -332,10 +332,10 @@ router.put('/payments/:appointmentId/payout', authenticate, requireAdmin, requir
       ...updateAppointment.toObject(),
       payoutAmount,
       platformFees,
-      message: payoutStatus === 'Paid'  // ✅ was paymentStatus
+      message: payoutStatus === 'Paid'  
         ? `Payout marked as paid. Doctor receives ₹${payoutAmount}, Platform keeps ₹${platformFees}`
-        : `Payout ${payoutStatus.toLowerCase()} successfully`  // ✅ was paymentStatus
-    }, `Payout ${payoutStatus.toLowerCase()} successfully`);  // ✅ was paymentStatus
+        : `Payout ${payoutStatus.toLowerCase()} successfully`  
+    }, `Payout ${payoutStatus.toLowerCase()} successfully`);  
 
   } catch (error) {
     res.serverError('Failed to payout payments', [error.message]);

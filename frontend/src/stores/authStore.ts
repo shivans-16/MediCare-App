@@ -35,15 +35,26 @@ export const useAuthStore = create<AuthState>()(
       error: null,
       isAuthenticated: false,
 
+      // setUser: (user, token) => {
+      //   localStorage.setItem("token", token);
+      //   set({
+      //     user,
+      //     token,
+      //     isAuthenticated: true,
+      //     error: null,
+      //   });
+      // },
       setUser: (user, token) => {
-        localStorage.setItem("token", token);
-        set({
-          user,
-          token,
-          isAuthenticated: true,
-          error: null,
-        });
-      },
+  localStorage.setItem("token", token);
+  // Token save hone ka time store karo
+  localStorage.setItem("token_saved_at", Date.now().toString());
+  set({
+    user,
+    token,
+    isAuthenticated: true,
+    error: null,
+  });
+},
 
       cleanError: () => set({ error: null }),
 
@@ -257,13 +268,32 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
 
+    // {
+    //   name: "auth-storage",
+    //   partialize: (state) => ({
+    //     user: state.user,
+    //     token: state.token,
+    //     isAuthenticated: state.isAuthenticated,
+    //   }),
+    // }
     {
-      name: "auth-storage",
-      partialize: (state) => ({
-        user: state.user,
-        token: state.token,
-        isAuthenticated: state.isAuthenticated,
-      }),
+  name: "auth-storage",
+  partialize: (state) => ({
+    user: state.user,
+    token: state.token,
+    isAuthenticated: state.isAuthenticated,
+  }),
+  onRehydrateStorage: () => (state) => {
+    if (!state) return;
+    
+    const savedAt = localStorage.getItem("token_saved_at");
+    const SIX_DAYS = 6 * 24 * 60 * 60 * 1000; // 6 din milliseconds mein
+    
+    // Agar token 6 din se purana hai toh logout kar do
+    if (savedAt && Date.now() - parseInt(savedAt) > SIX_DAYS) {
+      state.logout();
     }
+  },
+}
   )
 );

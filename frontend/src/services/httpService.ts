@@ -89,17 +89,27 @@ class HttpService {
       }
 
       if (!response.ok) {
-        if (response.status === 401) {
-          // ✅ Sirf tab logout karo jab login/signup page pe NA ho
-          const isAuthPage =
-            window.location.pathname.includes("/login") ||
-            window.location.pathname.includes("/signup");
+        // if (response.status === 401) {
+        //   // ✅ Sirf tab logout karo jab login/signup page pe NA ho
+        //   const isAuthPage =
+        //     window.location.pathname.includes("/login") ||
+        //     window.location.pathname.includes("/signup");
 
-          if (!isAuthPage) {
-            useAuthStore.getState().logout();
-            window.location.href = "/login";
-          }
-        }
+        //   if (!isAuthPage) {
+        //     useAuthStore.getState().logout();
+        //     window.location.href = "/login";
+        //   }
+        // }
+        if (response.status === 401 || response.status === 403) {
+  const isAuthPage =
+    window.location.pathname.includes("/login") ||
+    window.location.pathname.includes("/signup");
+
+  if (!isAuthPage) {
+    useAuthStore.getState().logout();
+    window.location.href = "/login";
+  }
+}
         throw new Error(data.message || `HTTP ${response.status}: ${response.statusText}`);
       }
 

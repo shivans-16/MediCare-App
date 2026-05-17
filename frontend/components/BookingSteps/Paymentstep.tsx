@@ -56,7 +56,7 @@ const PaymentStep = ({
   const platformFees = Math.round(consultationFee * 0.1);
   const totalAmount = consultationFee + platformFees;
 
-  // ✅ FIX 1: Load Razorpay script on mount — don't wait for appointmentId
+
   useEffect(() => {
     if (!window.Razorpay) {
       const script = document.createElement('script');
@@ -67,9 +67,8 @@ const PaymentStep = ({
     } else {
       setScriptLoaded(true);
     }
-  }, []); // ✅ empty deps — runs once on mount
+  }, []); 
 
-  // ✅ FIX 2: Auto-trigger payment when appointmentId arrives + script is ready
   useEffect(() => {
     if (
       appointmentId &&
@@ -81,7 +80,7 @@ const PaymentStep = ({
       hasAutoTriggered.current = true;
       handlePayment();
     }
-  }, [appointmentId, scriptLoaded]); // triggers when either changes
+  }, [appointmentId, scriptLoaded]); 
 
   const handlePayment = async () => {
     if (!appointmentId || !patientName) {
@@ -97,7 +96,6 @@ const PaymentStep = ({
       setIsPaymentLoading(true);
       setPaymentStatus('processing');
 
-      // Step 1: Create Razorpay order from backend
       const orderRes = await httpService.postWithAuth('/payment/create-order', { appointmentId });
 
       if (!orderRes.success) {
@@ -106,7 +104,7 @@ const PaymentStep = ({
 
       const { orderId, amount, currency, key } = orderRes.data;
 
-      // Step 2: Open Razorpay checkout
+     
       const options = {
         key,
         amount: amount * 100,
@@ -116,7 +114,7 @@ const PaymentStep = ({
         order_id: orderId,
         handler: async (response: any) => {
           try {
-            // Step 3: Verify payment on backend
+          
             const verifyRes = await httpService.postWithAuth('/payment/verify-payment', {
               appointmentId,
               razorpay_order_id: response.razorpay_order_id,
